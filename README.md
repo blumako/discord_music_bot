@@ -20,9 +20,9 @@ Use commands with prefix: '$'
 
 ## Commands:
 
-$join - join current voice channel sender is currently in
-$play "query" - join/play song either from text or url
-$skip - skip song and play next song in the queue
-$queue - lists all songs in the queue
+$join - join current voice channel sender is currently in\
+$play "query" - join/play song either from text or url\
+$skip - skip song and play next song in the queue\
+$queue - lists all songs in the queue\
 $leave - leaves the voice channel
 
