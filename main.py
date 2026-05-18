@@ -107,9 +107,11 @@ async def play(ctx, *, song_query: str):
 
     voice_channel = ctx.author.voice.channel
     voice_client = ctx.guild.voice_client
+    just_joined = False
 
     if voice_client is None:
         voice_client = await voice_channel.connect()
+        just_joined = True
     elif voice_channel != voice_client.channel:
         await voice_client.move_to(voice_channel)
 
@@ -140,12 +142,18 @@ async def play(ctx, *, song_query: str):
     if guild_id not in SONG_QUEUES:
         SONG_QUEUES[guild_id] = deque()
 
-    if voice_client.is_playing() or voice_client.is_paused():
-        SONG_QUEUES[guild_id].append((audio_url, title))
-        await ctx.send(f"Added to queue: **{title}**")
+    SONG_QUEUES[guild_id].append((audio_url, title))
+    if just_joined:
+        # play join sound, then start the queue after it finishes
+        source = FFmpegPCMAudio('linkstart.mp3', executable='/opt/homebrew/bin/ffmpeg')
+        voice_client.play(source, after=lambda e: asyncio.run_coroutine_threadsafe(
+            play_next_song(ctx, voice_client), bot.loop
+        ))
     else:
-        SONG_QUEUES[guild_id].append((audio_url, title))
-        await play_next_song(ctx, voice_client)
+        if voice_client.is_playing() or voice_client.is_paused():
+            await ctx.send(f"Added to queue: **{title}**")
+        else:
+            await play_next_song(ctx, voice_client)
 
 @bot.command()
 async def skip(ctx):
